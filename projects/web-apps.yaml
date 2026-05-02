@@ -1,0 +1,54 @@
+# AppProject — Applications web (portfolio, APIs, frontends...)
+# Frontière de sécurité : limite les sources, namespaces et ressources K8s autorisées.
+#
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: web-apps
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: "Applications web — Dombissi Soh Kamte Ezekiel"
+
+  sourceRepos:
+    - 'https://github.com/theopen4/*'
+
+  destinations:
+    - namespace: 'portfolio'
+      server: https://kubernetes.default.svc
+    - namespace: 'portfolio-*'
+      server: https://kubernetes.default.svc
+    - namespace: 'app-*'          # convention : toutes les futures apps préfixées app-
+      server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+
+  namespaceResourceWhitelist:
+    - group: 'apps'
+      kind: Deployment
+    - group: 'apps'
+      kind: ReplicaSet
+    - group: 'apps'
+      kind: StatefulSet
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ConfigMap
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: ServiceAccount
+    - group: ''
+      kind: PersistentVolumeClaim
+    - group: 'networking.k8s.io'
+      kind: Ingress
+    - group: 'policy'
+      kind: PodDisruptionBudget
+    - group: 'autoscaling'
+      kind: HorizontalPodAutoscaler
+
+  orphanedResources:
+    warn: true

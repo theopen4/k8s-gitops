@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: <NOM-APP>         # ⚠
+  namespace: <NOM-APP>    # ⚠
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+    # cert-manager.io/cluster-issuer: letsencrypt-prod   # décommenter si cert-manager installé
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: <NOM-APP>.ezekielsoh.com    # ⚠
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: <NOM-APP>         # ⚠
+                port:
+                  number: 80
+  # tls:                                # décommenter si cert-manager installé
+  #   - secretName: <NOM-APP>-tls
+  #     hosts:
+  #       - <NOM-APP>.ezekielsoh.com

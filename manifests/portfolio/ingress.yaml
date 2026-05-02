@@ -1,0 +1,34 @@
+# Ingress Traefik — expose le portfolio sur Internet
+# k3s installe Traefik par défaut comme ingress controller
+#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: portfolio
+  namespace: portfolio
+  annotations:
+    # Traefik : accepte HTTP et HTTPS
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    # Redirige automatiquement HTTP → HTTPS
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+    # Décommenter si cert-manager est installé (TLS automatique Let's Encrypt)
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  rules:
+    # ⚠ Remplacer par ton vrai domaine
+    - host: portfolio.ezekielsoh.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portfolio
+                port:
+                  number: 80
+  # Décommenter après installation cert-manager
+  # tls:
+  #   - secretName: portfolio-tls
+  #     hosts:
+  #       - portfolio.ezekielsoh.com

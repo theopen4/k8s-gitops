@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: portfolio
+  namespace: portfolio
+  labels:
+    app: portfolio
+spec:
+  type: ClusterIP                       # interne au cluster — Traefik l'expose vers l'extérieur
+  selector:
+    app: portfolio
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP

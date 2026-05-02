@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: <NOM-APP>      # ⚠
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+
+images:
+  - name: ghcr.io/theopen4/<NOM-APP>    # ⚠
+    newTag: latest                        # ← mis à jour automatiquement par ArgoCD Image Updater
+
+commonLabels:
+  app.kubernetes.io/managed-by: argocd
+  app.kubernetes.io/part-of: ezekiel-portfolio

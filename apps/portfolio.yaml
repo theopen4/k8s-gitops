@@ -1,0 +1,77 @@
+# ArgoCD Application — Portfolio Ezekiel Soh
+# Ce fichier est détecté automatiquement par le root-app (apps/ directory).
+#
+# ArgoCD Image Updater surveille l'image et met à jour kustomization.yaml
+# automatiquement via write-back git — plus besoin de job CI pour ça.
+#
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: portfolio
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/name: portfolio
+    app.kubernetes.io/managed-by: argocd
+    tier: web
+    owner: ezekiel-soh
+  annotations:
+    # ── ArgoCD Image Updater ───────────────────────────────────────────
+    # Alias "portfolio" → image ghcr.io/theopen4/portfolio-ezekiel
+    argocd-image-updater.argoproj.io/image-list: >-
+      portfolio=ghcr.io/theopen4/portfolio-ezekiel
+
+    # Stratégie semver : prend toujours la dernière version stable (ex: 1.2.3)
+    argocd-image-updater.argoproj.io/portfolio.update-strategy: semver
+
+    # N'accepte que les tags au format X.Y.Z (pas latest, pas sha-)
+    argocd-image-updater.argoproj.io/portfolio.allow-tags: >-
+      regexp:^[0-9]+\.[0-9]+\.[0-9]+$
+
+    # Write-back via git (commit dans ce repo gitops)
+    # ArgoCD Image Updater utilise les credentials du secret argocd-image-updater-secret
+    argocd-image-updater.argoproj.io/portfolio.write-back-method: git:secret:argocd/argocd-image-updater-secret
+
+    # Branche cible pour les commits de mise à jour
+    argocd-image-updater.argoproj.io/portfolio.git-branch: main
+
+    # Correspondance avec le nom d'image dans kustomization.yaml
+    argocd-image-updater.argoproj.io/portfolio.kustomize.image-name: >-
+      ghcr.io/theopen4/portfolio-ezekiel
+
+spec:
+  project: web-apps
+
+  source:
+    repoURL: https://github.com/theopen4/k8s-gitops.git
+    targetRevision: HEAD
+    path: manifests/portfolio
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: portfolio
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+
+  revisionHistoryLimit: 10
+
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas      # ignore si HPA modifie les replicas

@@ -1,0 +1,56 @@
+# TEMPLATE — Copier dans apps/<nom-app>.yaml et adapter les champs ⚠
+# Les champs marqués ⚠ SONT À MODIFIER.
+#
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: <NOM-APP>                          # ⚠ ex: api-gateway
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/name: <NOM-APP>      # ⚠
+    tier: web                              # ⚠ web | infra | data
+    owner: ezekiel-soh
+  annotations:
+    # ── ArgoCD Image Updater (supprimer si pas nécessaire) ─────────────
+    argocd-image-updater.argoproj.io/image-list: >-
+      app=ghcr.io/theopen4/<NOM-APP>       # ⚠
+
+    argocd-image-updater.argoproj.io/app.update-strategy: semver
+    argocd-image-updater.argoproj.io/app.allow-tags: >-
+      regexp:^[0-9]+\.[0-9]+\.[0-9]+$
+    argocd-image-updater.argoproj.io/app.write-back-method: git:secret:argocd/argocd-image-updater-secret
+    argocd-image-updater.argoproj.io/app.git-branch: main
+    argocd-image-updater.argoproj.io/app.kustomize.image-name: >-
+      ghcr.io/theopen4/<NOM-APP>           # ⚠
+
+spec:
+  project: web-apps                        # ⚠ web-apps | infra
+
+  source:
+    repoURL: https://github.com/theopen4/k8s-gitops.git
+    targetRevision: HEAD
+    path: manifests/<NOM-APP>              # ⚠
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: <NOM-APP>                   # ⚠ convention : même nom que l'app
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+
+  revisionHistoryLimit: 10

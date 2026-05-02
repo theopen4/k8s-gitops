@@ -1,0 +1,56 @@
+# AppProject — Frontière de sécurité pour toutes les apps perso
+# Définit : sources autorisées, namespaces cibles, ressources K8s permises
+#
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: ezekiel-apps
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: "Applications personnelles — Dombissi Soh Kamte Ezekiel"
+
+  # Seuls ces dépôts GitHub peuvent être sources d'une app de ce projet
+  sourceRepos:
+    - 'https://github.com/theopen4/*'
+
+  # Seuls ces namespaces peuvent être cibles de déploiement
+  destinations:
+    - namespace: 'portfolio'
+      server: https://kubernetes.default.svc
+    - namespace: 'portfolio-*'       # futures apps avec préfixe portfolio-
+      server: https://kubernetes.default.svc
+    - namespace: '*'                  # autres apps futures
+      server: https://kubernetes.default.svc
+
+  # Ressources cluster-level autorisées (ex: créer un Namespace)
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+
+  # Ressources namespace-level autorisées
+  namespaceResourceWhitelist:
+    - group: 'apps'
+      kind: Deployment
+    - group: 'apps'
+      kind: ReplicaSet
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ConfigMap
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: ServiceAccount
+    - group: 'networking.k8s.io'
+      kind: Ingress
+    - group: 'policy'
+      kind: PodDisruptionBudget
+
+  # Politique de retour en arrière si un sync échoue
+  syncWindows: []
+
+  # Pas d'accès orphan (ressources non trackées)
+  orphanedResources:
+    warn: true

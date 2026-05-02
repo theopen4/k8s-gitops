@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <NOM-APP>           # ⚠
+  namespace: <NOM-APP>      # ⚠
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: <NOM-APP>        # ⚠
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: <NOM-APP>      # ⚠
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: <NOM-APP>   # ⚠
+          image: ghcr.io/theopen4/<NOM-APP>:latest  # ⚠ géré par Image Updater
+          ports:
+            - containerPort: 80   # ⚠ adapter au port réel
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /health     # ⚠ adapter
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health     # ⚠ adapter
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 5 && nginx -s quit"]  # ⚠ adapter

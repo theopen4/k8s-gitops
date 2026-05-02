@@ -1,0 +1,33 @@
+# Déploie tous les AppProjects depuis le dossier projects/
+# Utilise le projet "default" (toujours présent dans ArgoCD) pour bootstrapper.
+# C'est la première app déployée — elle crée les frontières de sécurité
+# pour toutes les autres apps.
+#
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-projects
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    tier: bootstrap
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/theopen4/k8s-gitops.git
+    targetRevision: HEAD
+    path: projects
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+  revisionHistoryLimit: 5

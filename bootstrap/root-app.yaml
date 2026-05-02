@@ -1,0 +1,33 @@
+# Root Application — App of Apps Pattern
+# Ce fichier est appliqué UNE SEULE FOIS manuellement sur le cluster.
+# Ensuite ArgoCD gère tout le reste automatiquement.
+#
+# Usage: kubectl apply -f bootstrap/root-app.yaml -n argocd
+#
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    tier: bootstrap
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/theopen4/k8s-gitops.git
+    targetRevision: HEAD
+    path: apps
+    directory:
+      recurse: true        # détecte aussi les fichiers dans des sous-dossiers de apps/
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true          # supprime les apps retirées du git
+      selfHeal: true       # revert les modifications manuelles
+    syncOptions:
+      - CreateNamespace=true
