@@ -18,19 +18,16 @@ metadata:
     owner: ezekiel-soh
   annotations:
     # ── ArgoCD Image Updater ───────────────────────────────────────────
-    # Alias "portfolio" → image ghcr.io/theopen4/portfolio-ezekiel
+    # Alias "portfolio" → image ghcr.io/theopen4/portofolio-ezekiel
     argocd-image-updater.argoproj.io/image-list: >-
-      portfolio=ghcr.io/theopen4/portfolio-ezekiel
+      portfolio=ghcr.io/theopen4/portofolio-ezekiel
 
-    # Stratégie semver : prend toujours la dernière version stable (ex: 1.2.3)
-    # argocd-image-updater.argoproj.io/portfolio.update-strategy: semver
-    argocd-image-updater.argoproj.io/portfolio.update-strategy: latest
+    # Stratégie newest-build : prend toujours l'image la plus récente (basé sur la date de création)
+    argocd-image-updater.argoproj.io/portfolio.update-strategy: newest-build
 
-    # N'accepte que les tags au format X.Y.Z (pas latest, pas sha-)
-    # argocd-image-updater.argoproj.io/portfolio.allow-tags: >-
-    #   regexp:^[0-9]+\.[0-9]+\.[0-9]+$
-    argocd-image-updater.argoproj.io/portfolio.allow-tags: >-
-       regexp:^sha-[a-f0-9]+$
+    # N'accepte que les tags au format sha-xxxxxxx (7 caractères hexadécimaux)
+    argocd-image-updater.argoproj.io/portfolio.allow-tags: regexp:^sha-[a-f0-9]{7}$
+
 
     # Write-back via git (commit dans ce repo gitops)
     # ArgoCD Image Updater utilise les credentials du secret argocd-image-updater-secret
@@ -41,7 +38,7 @@ metadata:
 
     # Correspondance avec le nom d'image dans kustomization.yaml
     argocd-image-updater.argoproj.io/portfolio.kustomize.image-name: >-
-      ghcr.io/theopen4/portfolio-ezekiel
+      ghcr.io/theopen4/portofolio-ezekiel
 
 spec:
   project: web-apps

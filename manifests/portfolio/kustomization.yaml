@@ -16,8 +16,8 @@ resources:
 # GitHub Actions met à jour "newTag" automatiquement à chaque release.
 # Ne pas modifier manuellement — laisser le pipeline CI le gérer.
 images:
-  - name: ghcr.io/theopen4/portfolio-ezekiel
-    newTag: latest                      # ← mis à jour automatiquement par CI
+  - name: ghcr.io/theopen4/portofolio-ezekiel
+    newTag: sha-a136faa
 
 # ── Labels ajoutés à toutes les ressources ───────────────────────────
 commonLabels:

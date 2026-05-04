@@ -46,7 +46,7 @@ spec:
       containers:
         - name: portfolio
           # ⚠ L'image et le tag sont gérés par kustomization.yaml
-          image: ghcr.io/theopen4/portfolio-ezekiel:latest
+          image: ghcr.io/theopen4/portofolio-ezekiel:latest
           imagePullPolicy: Always
 
           ports:
