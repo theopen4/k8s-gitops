@@ -30,7 +30,7 @@ spec:
           # Intervalle de polling du registry
           updateInterval: 2m
           # Log level : debug pour investiguer, info en prod
-          logLevel: info
+          logLevel: debug
           # Credentials git pour le write-back
           gitCommitUser: "argocd-image-updater[bot]"
           gitCommitMail: "argocd-image-updater[bot]@users.noreply.github.com"
